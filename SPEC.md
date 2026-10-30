@@ -87,7 +87,7 @@ Use `unit`, `integration`, and `e2e` pytest markers. Run `.venv/bin/python check
   and [Chromium round, keyboard replay, and history limit](tests/e2e/test_round.py).
   Supplied missing/unsupported-input checks remain in
   [the unchanged shell tests](tests/test_shell.py).
-- Full local check (2026-10-30), Python 3.12.14:
+- Original rules/history full local check (2026-10-30), Python 3.12.14:
   `.venv/bin/python check.py` exited 0. Black and Pylint passed; non-browser
   pytest: 28 passed (9 unit and 19 integration); Chromium: 7 passed. This covers
   the implemented rules and history as well as the original starter checks.
@@ -129,3 +129,57 @@ Use `unit`, `integration`, and `e2e` pytest markers. Run `.venv/bin/python check
   non-browser tests, and 5 Chromium tests. The student supplied a screenshot of
   the starting page with the unfinished-rules notice. This was baseline evidence
   only, not proof of completed winner rules.
+
+## Requested extension: confetti and longest winning streak
+
+- On a player win, play a short confetti animation. Do not celebrate a computer
+  win, tie, rejected input, or a visit to the starting page. Replay must remain
+  usable during the animation. Remove the confetti after it finishes.
+- Respect the browser's reduced-motion preference: keep the result and streak
+  visible while skipping the animation. Use local CSS/JavaScript with no new
+  dependencies or external services.
+- Show the player's longest winning streak and current streak in a panel on the
+  right of the game on wide screens; stack the panel on narrow screens.
+- Each win increases the current streak by one. At the student's explicit
+  request, ties leave it unchanged. A loss resets only the current streak to
+  zero. The longest streak is the largest current streak reached.
+- Example sequence proposed by the agent: win, win, tie, loss leaves the current
+  streak at zero and the longest streak at two. A subsequent win leaves current
+  one and longest two. Four wins can produce a longest streak of four even
+  though history stores only the last three games.
+- Keep both counts with the existing temporary browser-session history. They
+  start at zero, remain separate between clients, survive viewing the starting
+  page, and reset when the server restarts. Rejected moves do not affect them.
+- Validation: add real-request sequence checks and browser checks for winning
+  confetti, cleanup, replay, ties, losses, the retained record, and reduced motion.
+  Preserve the original winner rules and existing checks.
+
+### Extension evidence (2026-10-30)
+
+- Implementation: [session streak updates](app.py), [streak panel](templates/index.html),
+  [local confetti script](static/confetti.js), and [responsive styling](static/style.css).
+- Tests: [real-request streak sequences](tests/test_streaks.py) and
+  [Chromium celebration and motion-preference checks](tests/e2e/test_celebration.py).
+- Final full `.venv/bin/python check.py`, Python 3.12.14: exit 0, Black and
+  Pylint passed, 38 non-browser tests passed, and 10 Chromium tests passed
+  (48 total). The supplied check settings and original tests remain unchanged.
+- Browser verification used real move submissions and fixed only the computer's
+  random choice. Win, win, tie, loss, win produced the displayed current/best
+  streaks 1/1, 2/2, 2/2, 0/2, 1/2. Confetti appeared only on wins, disappeared
+  after its animation, and did not block replay. Reduced motion suppressed it
+  while preserving the result and streak.
+- Review found that a motion-preference change during the animation could leave
+  hidden confetti elements. A direct media-query change listener now removes
+  them; a new Chromium regression test confirms this behavior.
+- Additional browser inspection verified that the panel sits to the right at
+  1280 pixels and stacks below the game at 375 pixels, with no horizontal
+  overflow. Real winning requests returned HTTP 200 and no browser JavaScript
+  errors or failed network requests occurred. Screenshots were inspected locally.
+- Remaining review finding: refreshing the completed POST can replay the form
+  submission. The agent reproduced one move click followed by a browser reload
+  sending two POSTs and increasing the current streak from 1 to 2. The supplied
+  server's form-response pattern is retained; a redirect-after-submit flow is a
+  recommended follow-up. Open the starting address with GET to avoid resubmission.
+- The student's browser feedback above covers the earlier rules/history version.
+  Student review and discussion of an actual new streak test remain to be recorded
+  for this extension. These new automated observations are the agent's checks.

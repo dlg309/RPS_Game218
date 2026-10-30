@@ -14,61 +14,83 @@
         <p class="intro">You versus the computer. One move, one round.</p>
       </header>
 
-      <section class="game" aria-labelledby="game-heading">
-        {% if error %}
-          <p class="notice" role="alert">{{ error }}</p>
-        {% endif %}
+      <div class="play-layout">
+        <section class="game" aria-labelledby="game-heading">
+          {% if error %}
+            <p class="notice" role="alert">{{ error }}</p>
+          {% endif %}
 
-        {% if unfinished %}
-          <div class="notice" role="status">
-            <strong>Starter: game rules not built yet.</strong>
-            <span>The page works. RPS-001 will make it decide a winner.</span>
+          {% if unfinished %}
+            <div class="notice" role="status">
+              <strong>Starter: game rules not built yet.</strong>
+              <span>The page works. RPS-001 will make it decide a winner.</span>
+            </div>
+          {% endif %}
+
+          {% if player and computer %}
+            <div class="choices" aria-label="This round’s choices">
+              <div><p class="choice-label">You chose</p><p class="choice-value">{{ player|capitalize }} <span aria-hidden="true">{{ moves[player] }}</span></p></div>
+              <span class="versus" aria-hidden="true">vs</span>
+              <div><p class="choice-label">Computer chose</p><p class="choice-value">{{ computer|capitalize }} <span aria-hidden="true">{{ moves[computer] }}</span></p></div>
+            </div>
+          {% endif %}
+
+          <div class="result"{% if outcome %} data-outcome="{{ outcome }}"{% endif %}>
+            <h2 id="game-heading">{{ result[0] if result else 'Your next move?' }}</h2>
+            <p>{{ result[1] if result else 'Choose a move below to play.' }}</p>
           </div>
-        {% endif %}
 
-        {% if player and computer %}
-          <div class="choices" aria-label="This round’s choices">
-            <div><p class="choice-label">You chose</p><p class="choice-value">{{ player|capitalize }} <span aria-hidden="true">{{ moves[player] }}</span></p></div>
-            <span class="versus" aria-hidden="true">vs</span>
-            <div><p class="choice-label">Computer chose</p><p class="choice-value">{{ computer|capitalize }} <span aria-hidden="true">{{ moves[computer] }}</span></p></div>
-          </div>
-        {% endif %}
-
-        <div class="result"{% if outcome %} data-outcome="{{ outcome }}"{% endif %}>
-          <h2 id="game-heading">{{ result[0] if result else 'Your next move?' }}</h2>
-          <p>{{ result[1] if result else 'Choose a move below to play.' }}</p>
-        </div>
-
-        <form method="post" aria-label="Choose your move">
-          {% for name, symbol in moves.items() %}
-            <button type="submit" name="move" value="{{ name }}" class="move {{ name }}">
-              <span class="symbol" aria-hidden="true">{{ symbol }}</span>
-              <span>{{ name|capitalize }}</span>
-            </button>
-          {% endfor %}
-        </form>
-        <p class="hint">Each click plays a new round.</p>
-      </section>
-
-      <section class="history" aria-labelledby="history-heading">
-        <h2 id="history-heading">Recent games</h2>
-        <p class="history-intro">Your latest three rounds, newest first.</p>
-        {% if history %}
-          <ol class="history-list">
-            {% for round in history %}
-              <li class="history-round" data-history-player="{{ round.player }}" data-history-computer="{{ round.computer }}" data-history-outcome="{{ round.outcome }}">
-                <span>You: {{ round.player|capitalize }} · Computer: {{ round.computer|capitalize }}</span>
-                <strong>{{ results[round.outcome][0] }}</strong>
-              </li>
+          <form method="post" aria-label="Choose your move">
+            {% for name, symbol in moves.items() %}
+              <button type="submit" name="move" value="{{ name }}" class="move {{ name }}">
+                <span class="symbol" aria-hidden="true">{{ symbol }}</span>
+                <span>{{ name|capitalize }}</span>
+              </button>
             {% endfor %}
-          </ol>
-        {% else %}
-          <p class="history-empty">Play a round to start your history.</p>
-        {% endif %}
-      </section>
+          </form>
+          <p class="hint">Each click plays a new round.</p>
+        </section>
+
+        <aside class="streaks" aria-labelledby="streak-heading">
+          <h2 id="streak-heading">Winning streak</h2>
+          <p class="streak-intro">Your wins between losses.</p>
+          <dl class="streak-stats">
+            <div>
+              <dt>Longest streak</dt>
+              <dd id="best-streak">{{ best_streak }}</dd>
+            </div>
+            <div>
+              <dt>Current streak</dt>
+              <dd id="current-streak">{{ current_streak }}</dd>
+            </div>
+          </dl>
+          <p class="streak-note">Ties keep your streak. A loss starts it over.</p>
+          <p class="streak-note">Your longest streak is kept for this session.</p>
+        </aside>
+
+        <section class="history" aria-labelledby="history-heading">
+          <h2 id="history-heading">Recent games</h2>
+          <p class="history-intro">Your latest three rounds, newest first.</p>
+          {% if history %}
+            <ol class="history-list">
+              {% for round in history %}
+                <li class="history-round" data-history-player="{{ round.player }}" data-history-computer="{{ round.computer }}" data-history-outcome="{{ round.outcome }}">
+                  <span>You: {{ round.player|capitalize }} · Computer: {{ round.computer|capitalize }}</span>
+                  <strong>{{ results[round.outcome][0] }}</strong>
+                </li>
+              {% endfor %}
+            </ol>
+          {% else %}
+            <p class="history-empty">Play a round to start your history.</p>
+          {% endif %}
+        </section>
+      </div>
 
       <footer>Rock beats scissors. Scissors beats paper. Paper beats rock.</footer>
     </main>
+    {% if outcome == 'win' %}
+      <script defer src="{{ url_for('static', filename='confetti.js') }}"></script>
+    {% endif %}
     {% if dev_refresh_revision is defined %}
       <script src="{{ url_for('static', filename='dev-refresh.js') }}"
               data-revision="{{ dev_refresh_revision }}"

@@ -45,6 +45,13 @@ def index():
             except NotImplementedError:
                 unfinished = True
             else:
+                if outcome == "win":
+                    session["current_streak"] = session.get("current_streak", 0) + 1
+                    session["best_streak"] = max(
+                        session.get("best_streak", 0), session["current_streak"]
+                    )
+                elif outcome == "lose":
+                    session["current_streak"] = 0
                 session["history"] = [
                     {"player": player, "computer": computer, "outcome": outcome},
                     *session.get("history", []),
@@ -61,4 +68,6 @@ def index():
         error=error,
         history=session.get("history", []),
         results=RESULTS,
+        current_streak=session.get("current_streak", 0),
+        best_streak=session.get("best_streak", 0),
     ), (400 if error else 200)
