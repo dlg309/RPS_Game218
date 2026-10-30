@@ -79,7 +79,17 @@ Use `unit`, `integration`, and `e2e` pytest markers. Run `.venv/bin/python check
 ### Work record
 
 - Issue: [RPS-001: Play a round — #1](https://github.com/dlg309/RPS_Game218/issues/1).
-- Pull request / CI: add actual URLs when they exist.
+- Pull request: [RPS-001: Play a round with history, confetti, and streaks — #2](https://github.com/dlg309/RPS_Game218/pull/2),
+  merged into `main` on 2026-10-30 as `93edbfb`. Its description includes
+  `Closes #1`; issue #1 is closed.
+- Implementation CI: [Python checks run](https://github.com/dlg309/RPS_Game218/actions/runs/41097015050)
+  passed on the final PR head `46f0584` before merge. Its job log confirms Black,
+  Pylint, 38 non-browser tests, and 10 Chromium tests passed.
+- Merged-main CI: [Python checks run](https://github.com/dlg309/RPS_Game218/actions/runs/41097331625)
+  also passed on merge commit `93edbfb`.
+- Evidence-record correction: the PR and CI link update was prepared locally
+  before merge but was not included in PR #2. This documentation-only follow-up
+  supplies those missing published links; it does not change the tested code.
 - Implementation: [winner rules](game.py), [round requests and session history](app.py),
   [supplied interface with recent games](templates/index.html), and
   [history styling](static/style.css).
@@ -129,6 +139,19 @@ Use `unit`, `integration`, and `e2e` pytest markers. Run `.venv/bin/python check
   non-browser tests, and 5 Chromium tests. The student supplied a screenshot of
   the starting page with the unfinished-rules notice. This was baseline evidence
   only, not proof of completed winner rules.
+
+### RPS-001 rubric evidence index
+
+| Criterion | Evidence |
+| --- | --- |
+| Rules and round behavior (30) | [Winner function](game.py) matches all nine literal outcomes above. The [supplied move form and results](templates/index.html) remain usable for replay. The [server](app.py) rejects missing/unsupported moves with HTTP 400 and an allowed-moves message. |
+| Meaningful automated tests (30) | [tests/test_game.py](tests/test_game.py) contains nine literal unit outcomes and real-rule request/result checks. [tests/e2e/test_round.py](tests/e2e/test_round.py) uses the supplied live-server/page fixtures for real round/replay and keyboard controls. Tests use unit/integration/e2e markers. [Supplied negative tests](tests/test_shell.py) are unchanged; new positive tests fix only randomness. |
+| Full checks and CI (15) | Full local Python 3.12.14 check: Black/Pylint passed, 38 non-browser and 10 Chromium tests passed, exit 0. [Final PR-head CI](https://github.com/dlg309/RPS_Game218/actions/runs/41097015050) and [merged-main CI](https://github.com/dlg309/RPS_Game218/actions/runs/41097331625) passed. Shared settings, assertions, fixtures, and check runner match the official starter. |
+| SPEC and review evidence (15) | The agreed plan preserves the rock-against-paper prediction and reason. The work record links code/tests and explains the actual rock-versus-paper test and mistake caught. It records the student's scissors tie with why, Tab/Enter replay, and three-game history observation, and distinguishes agent help/automation from student observations. |
+| GitHub delivery (10) | [Public own repository](https://github.com/dlg309/RPS_Game218), [merged PR #2](https://github.com/dlg309/RPS_Game218/pull/2), and [closed issue #1](https://github.com/dlg309/RPS_Game218/issues/1). Completed code/tests are on `main`; PR #2 describes actual validation and includes `Closes #1`. Tracked files exclude the virtual environment, caches, browser diagnostics, and credentials. |
+
+The history, confetti, and streak features are explicitly requested extensions;
+the original nine winner outcomes and negative-input requirements still apply.
 
 ## Requested extension: confetti and longest winning streak
 
@@ -180,6 +203,6 @@ Use `unit`, `integration`, and `e2e` pytest markers. Run `.venv/bin/python check
   sending two POSTs and increasing the current streak from 1 to 2. The supplied
   server's form-response pattern is retained; a redirect-after-submit flow is a
   recommended follow-up. Open the starting address with GET to avoid resubmission.
-- The student's browser feedback above covers the earlier rules/history version.
-  Student review and discussion of an actual new streak test remain to be recorded
-  for this extension. These new automated observations are the agent's checks.
+- The student's browser feedback above covers the rules/history version. The
+  confetti, reduced-motion, and streak observations here are automated checks by
+  the agent, not claims of additional student testing.
